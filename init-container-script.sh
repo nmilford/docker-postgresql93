@@ -4,7 +4,7 @@
 
 # Create a new PostgreSQL user.
 create_pg_user () {
-    # Create the given user in PostgreSQL. 
+    # Create the given user in PostgreSQL.
     # If the user already exists PostgreSQL will return an error, but we don't care.
     echo "CREATE USER $PG_USERNAME WITH SUPERUSER PASSWORD '$PG_PASSWORD';" | su - postgres -c "psql"
     echo "CREATE DATABASE $PG_USERNAME OWNER $PG_USERNAME;" | su - postgres -c "psql"
@@ -25,7 +25,7 @@ add_ssh_key () {
 # Move PostgreSQL data folder to the shared volume.
 move_postgresql_data_to_shared_volume () {
     # Test if /var/lib/postgresql/9.3/main is a symlink.
-    if [[ -L "/var/lib/postgresql/9.3/main" ]]
+    if [[ -L "/var/lib/postgresql/9.5/main" ]]
     then
         echo "Data have already been moved."
     else
@@ -42,8 +42,8 @@ move_postgresql_data_to_shared_volume () {
         if [ $? = 3 ] && [ ! "$(ls -A /srv/pgdata/data)" ] && [ ! "$(ls -A /srv/pgdata/logs)" ]
         then
             # Move the data dir to the mounted volume.
-            su - postgres -c "mv /var/lib/postgresql/9.3/main /srv/pgdata/data"
-            su - postgres -c "ln -s /srv/pgdata/data/main /var/lib/postgresql/9.3/main"
+            su - postgres -c "mv /var/lib/postgresql/9.5/main /srv/pgdata/data"
+            su - postgres -c "ln -s /srv/pgdata/data/main /var/lib/postgresql/9.5/main"
 
             # Move the logs to the mounted volume.
             mv /var/log/postgresql /srv/pgdata/logs
@@ -56,14 +56,14 @@ move_postgresql_data_to_shared_volume () {
 
         # Start PostgreSQL.
         service postgresql start
-    fi  
+    fi
 }
 
 # STEP 1: add the given SSH public key.
 # During a `docker run` the environment variable SSH_PUBLIC_KEY must be passed.
 # This key will be added to the authorized_keys of the SSH server of the container.
 # This way the key's owner is allowed to SSH into the container.
-echo " * Adding public SSH key..." 
+echo " * Adding public SSH key..."
 if [ ! -z "$SSH_PUBLIC_KEY" ]  # If the env var $SSH_PUBLIC_KEY is set.
 then
     add_ssh_key

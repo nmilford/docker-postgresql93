@@ -2,7 +2,7 @@
 # sure you lock down to a specific version, not to `latest`!
 # See https://github.com/phusion/baseimage-docker/blob/master/Changelog.md for
 # a list of version numbers.
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:0.9.21
 
 # Set correct environment variables.
 ENV HOME /root
@@ -12,7 +12,7 @@ ENV HOME /root
 # init system will auto-generate one during boot.
 RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
 
-# ideal solution is to change to devmapper for storage 
+# ideal solution is to change to devmapper for storage
 # add the following line to /etc/docker/default
 # DOCKER_OPTS="--storage-driver=devicemapper"
 # then restart the docker service
@@ -28,9 +28,15 @@ CMD ["/sbin/my_init"]
 # Create a mount point
 VOLUME ["/srv/pgdata"]
 
-# Install PostgreSQL 9.3.
+# Install PostgreSQL 9.5.
+RUN curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+#RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+
+
 RUN apt-get update
-RUN apt-get install -y postgresql-9.3
+RUN apt-get install -y python-software-properties software-properties-common postgresql-9.5 postgresql-client-9.5 postgresql-contrib-9.5
+
 
 # work around for AUFS bug
 # as per https://github.com/docker/docker/issues/783#issuecomment-56013588
@@ -38,9 +44,9 @@ RUN echo "mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-co
 
 # Adjust PostgreSQL configuration so that remote connections to the database are possible.
 # Note: this is not a security threat because the port 5432 is firewalled in the host machine.
-RUN echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/9.3/main/pg_hba.conf
-# And add 'listen_addresses' to '/etc/postgresql/9.3/main/postgresql.conf'.
-RUN echo "listen_addresses='*'" >> /etc/postgresql/9.3/main/postgresql.conf
+RUN echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/9.5/main/pg_hba.conf
+# And add 'listen_addresses' to '/etc/postgresql/9.5/main/postgresql.conf'.
+RUN echo "listen_addresses='*'" >> /etc/postgresql/9.5/main/postgresql.conf
 
 # Expose SSH and PostgreSQL ports.
 EXPOSE 5432 22
@@ -89,11 +95,11 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 #
 # EXAMPLES:
 #   $ docker run -d -p 2223:22 -p 5432:5432 --name postgresql --volume=/mylocaldir:/srv/pgdata -e "PG_USERNAME=myuser" -e "PG_PASSWORD=mypass" -e "SSH_PUBLIC_KEY=..." nimiq/postgresql
-# 
+#
 # A more user-friendly input of the public SSH key:
 #   $ read MY_SSH_KEY < ~/.ssh/id_rsa.pub
 #   $ docker run -d -p 2223:22 -p 5432:5432 --name postgresql --volume=/mylocaldir:/srv/pgdata -e "PG_USERNAME=myuser" -e "PG_PASSWORD=mypass" -e "SSH_PUBLIC_KEY=$MY_SSH_KEY" nimiq/postgresql
-#     
+#
 # Run a one-shot interactive shell:
 #   $ read MY_SSH_KEY < ~/.ssh/id_rsa.pub
 #   $ docker run -ti --rm -p 2223:22 -p 5432:5432 --name postgresql --volume=/mylocaldir:/srv/pgdata -e "PG_USERNAME=myuser" -e "PG_PASSWORD=mypass" -e "SSH_PUBLIC_KEY=$MY_SSH_KEY" nimiq/postgresql /sbin/my_init -- bash
