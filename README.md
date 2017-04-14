@@ -1,11 +1,10 @@
 # DOCKER-POSTGRESQL93
 
-A [Docker](https://www.docker.com/) container for PostgreSQL 9.3 with *special features*. Available for pulling from
-[Docker Hub Registry](https://registry.hub.docker.com/u/nimiq/postgresql93/).
+A [Docker](https://www.docker.com/) container for PostgreSQL 9.5 with *special features*. 
 
 Features:  
-- Based on [Ubuntu 14.04](http://www.ubuntu.com/) and [phusion/baseimage-docker](https://github.com/phusion/baseimage-docker)
-- [PostgreSQL 9.3](http://www.postgresql.org/)
+- Based on [Ubuntu 16.04](http://www.ubuntu.com/) and [phusion/baseimage-docker](https://github.com/phusion/baseimage-docker)
+- [PostgreSQL 9.5](http://www.postgresql.org/)
 - Automatically create your PostgreSQL *superuser* with the given *password*
 - Integrated [SSH server](http://en.wikipedia.org/wiki/Secure_Shell)
 - Add your *public key* to the container's SSH server for an easy access
@@ -18,7 +17,7 @@ Links:
 
 ## BUILD
 ```
-$ docker build -t nimiq/postgresql .
+$ docker build -t nmilford/postgresql .
 ```
 
 ## RUN
